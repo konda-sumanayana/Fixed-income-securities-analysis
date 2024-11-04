@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixed Income Securities Analysis</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        h2 {
+            color: #34495e;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+        .chart-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .explanation {
+            background-color: #e8f4f8;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+        @media (min-width: 768px) {
+            .chart-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Fixed Income Securities Analysis</h1>
+    
+    <div class="chart-grid">
+        <div class="chart-container">
+            <h2>Yield Curves</h2>
+            <div class="explanation">
+                <p>Yield curves show the relationship between interest rates and bond maturity. Normal (upward) curves suggest economic expansion, inverted (downward) may indicate recession, and flat curves suggest uncertainty.</p>
+                <p><strong>How to use:</strong> Compare curves of different companies. Higher yields often mean higher risk. Look for favorable risk-reward opportunities.</p>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="yieldCurveChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <h2>Risk Metrics</h2>
+            <div class="explanation">
+                <p>Value at Risk (VaR) estimates maximum potential loss. Conditional Value at Risk (CVaR) measures expected loss beyond VaR.</p>
+                <p><strong>How to use:</strong> Lower values indicate lower risk. Balance with potential returns when making decisions.</p>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="riskChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <h2>Optimal Portfolio</h2>
+            <div class="explanation">
+                <p>Shows optimal investment allocation across companies to maximize risk-adjusted return (Sharpe ratio).</p>
+                <p><strong>How to use:</strong> Consider this allocation as a starting point, but adjust based on your risk tolerance and goals.</p>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="portfolioChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <h2>Macroeconomic Impact</h2>
+            <div class="explanation">
+                <p>Illustrates how macroeconomic factors might impact bond yields. Positive values indicate an increase in yields, negative values suggest a decrease.</p>
+                <p><strong>How to use:</strong> Consider these impacts when making decisions, especially if you have expectations about future economic changes.</p>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="macroImpactChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    fetch('/data')
+        .then(response => response.json())
+        .then(data => {
+            // Yield Curves
+            new Chart(document.getElementById('yieldCurveChart'), {
+                type: 'line',
+                data: {
+                    labels: data.yield_curves.maturities,
+                    datasets: Object.entries(data.yield_curves.yields).map(([company, yields]) => ({
+                        label: company,
+                        data: yields,
+                        fill: false
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: 'Yield Curves' },
+                        legend: { position: 'bottom' }
+                    },
+                    scales: { y: { title: { display: true, text: 'Yield (%)' } } }
+                }
+            });
+
+            // Risk Metrics
+            new Chart(document.getElementById('riskChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(data.risk_metrics),
+                    datasets: [
+                        {
+                            label: 'VaR',
+                            data: Object.values(data.risk_metrics).map(m => m.var)
+                        },
+                        {
+                            label: 'CVaR',
+                            data: Object.values(data.risk_metrics).map(m => m.cvar)
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: 'Risk Metrics' },
+                        legend: { position: 'bottom' }
+                    },
+                    scales: { y: { title: { display: true, text: 'Value' } } }
+                }
+            });
+
+            // Optimal Portfolio
+            new Chart(document.getElementById('portfolioChart'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(data.optimal_portfolio),
+                    datasets: [{
+                        data: Object.values(data.optimal_portfolio)
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: 'Optimal Portfolio Allocation' },
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            // Macroeconomic Impact
+            new Chart(document.getElementById('macroImpactChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(data.macro_impact),
+                    datasets: [{
+                        label: 'Impact on Yield',
+                        data: Object.values(data.macro_impact)
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: 'Macroeconomic Factors Impact' },
+                        legend: { position: 'bottom' }
+                    },
+                    scales: { y: { title: { display: true, text: 'Impact' } } }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
