@@ -1,7 +1,5 @@
-# app.py
 from flask import Flask, render_template, jsonify
-from finance_models import (get_yield_curves, get_risk_metrics, 
-                            get_optimal_portfolio, get_macro_impact)
+from finance_models import main
 
 app = Flask(__name__)
 
@@ -11,17 +9,9 @@ def index():
 
 @app.route('/data')
 def data():
-    yield_curves = get_yield_curves()
-    risk_metrics = get_risk_metrics()
-    optimal_portfolio = get_optimal_portfolio()
-    macro_impact = get_macro_impact()
-    
-    return jsonify({
-        'yield_curves': yield_curves,
-        'risk_metrics': risk_metrics,
-        'optimal_portfolio': optimal_portfolio,
-        'macro_impact': macro_impact
-    })
+    api_key = 'ec4077324af26cb6d90f2ae75dcd2541'
+    results = main(api_key)
+    return jsonify(results)
 
 if __name__ == '__main__':
     app.run(debug=True)
