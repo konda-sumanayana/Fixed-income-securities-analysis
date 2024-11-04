@@ -9,7 +9,7 @@ def index():
 
 @app.route('/data')
 def data():
-    api_key = 'ec4077324af26cb6d90f2ae75dcd2541'
+    api_key = 'your-api-key'
     results = main(api_key)
     return jsonify(results)
 
