@@ -196,6 +196,6 @@ def main(api_key):
     }
 
 if __name__ == "__main__":
-    api_key = 'ec4077324af26cb6d90f2ae75dcd2541'
+    api_key = 'your-api-key'
     results = main(api_key)
     print(results)
